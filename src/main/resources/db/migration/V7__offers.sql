@@ -1,0 +1,21 @@
+CREATE TABLE offers (
+    id              uuid          PRIMARY KEY,
+    application_id  uuid          NOT NULL UNIQUE REFERENCES applications (id),
+    product         text          NOT NULL,
+    amount          numeric(14,2) NOT NULL,
+    annual_rate     numeric(5,2)  NOT NULL,
+    tenure_months   int           NOT NULL,
+    emi             numeric(14,2) NOT NULL,
+    processing_fee  numeric(14,2) NOT NULL,
+    fee_gst         numeric(14,2) NOT NULL,
+    upfront_charges numeric(14,2) NOT NULL,
+    net_disbursal   numeric(14,2) NOT NULL,
+    total_interest  numeric(14,2) NOT NULL,
+    total_repayable numeric(14,2) NOT NULL,
+    status          text          NOT NULL CHECK (status IN ('OFFERED', 'ACCEPTED')),
+    valid_until     timestamptz   NOT NULL,
+    created_at      timestamptz   NOT NULL,
+    accepted_at     timestamptz,
+    accepted_by     text,
+    CHECK ((status = 'ACCEPTED') = (accepted_at IS NOT NULL AND accepted_by IS NOT NULL))
+);

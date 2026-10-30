@@ -90,6 +90,14 @@ lendflow:
     max-attempts: 4
     first-backoff: 2s
     max-backoff: 60s
+  offers:
+    gst-percent: 18
+    personal:
+      minimum-fee: 1000
+      valid-for: 7d
+    home:
+      fee-cap: 25000
+      valid-for: 30d
   dedupe:
     name-threshold: 0.92
     lookback: P180D
