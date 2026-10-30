@@ -1,0 +1,17 @@
+{
+  "priority": 2,
+  "request": {
+    "method": "POST",
+    "url": "/pan/verify",
+    "bodyPatterns": [{ "matchesJsonPath": "$[?(@.pan =~ /[A-Z]{5}0[0-9]{3}[A-Z]/)]" }]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "pan": "{{jsonPath request.body '$.pan'}}",
+      "status": "INVALID"
+    },
+    "transformers": ["response-template"]
+  }
+}
