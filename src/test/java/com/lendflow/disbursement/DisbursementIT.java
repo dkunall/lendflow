@@ -85,7 +85,7 @@ class DisbursementIT extends IntegrationTest {
         assertThat(jdbc.sql("SELECT count(*) FROM application_history WHERE application_id = ?::uuid AND to_status = 'DISBURSED'")
             .param(s.applicationId()).query(Integer.class).single()).isEqualTo(1);
 
-        Sanctioned other = sanctioned("Neha Kapoor");
+        Sanctioned other = sanctioned("Nisha Bansal");
         assertThat(ops.post("/v1/disbursements/" + other.disbursementId() + "/confirm", utr(ref)).expect(409).body()
             .path("code").asText()).isEqualTo("utr-already-used");
         assertThat(status(other)).isEqualTo("SANCTIONED");
