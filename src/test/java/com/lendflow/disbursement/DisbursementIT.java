@@ -35,7 +35,7 @@ class DisbursementIT extends IntegrationTest {
         Api ops = as("ops-" + unique(), OPS);
         JsonNode request = await().atMost(Duration.ofSeconds(15)).until(
             () -> ops.get("/v1/disbursements?application=" + id),
-            r -> r.status() == 200).body().get(0);
+            r -> r.status() == 200 && !r.body().isEmpty()).body().get(0);
         return new Sanctioned(applicant, id, request.path("id").asText());
     }
 

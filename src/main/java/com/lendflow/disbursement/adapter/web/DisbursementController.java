@@ -27,7 +27,7 @@ class DisbursementController {
     @GetMapping("/v1/disbursements")
     List<Disbursement> pending(@RequestParam(required = false) UUID application,
                                @RequestParam(defaultValue = "50") int limit) {
-        return application == null ? disbursements.pending(limit) : List.of(disbursements.forApplication(application));
+        return application == null ? disbursements.pending(limit) : disbursements.forApplication(application).stream().toList();
     }
 
     @GetMapping("/v1/disbursements/{id}")

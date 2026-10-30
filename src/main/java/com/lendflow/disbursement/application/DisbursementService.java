@@ -17,6 +17,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,10 +77,8 @@ public class DisbursementService {
     }
 
     @Transactional(readOnly = true)
-    public Disbursement forApplication(UUID applicationId) {
-        return disbursements.forApplication(applicationId)
-            .orElseThrow(() -> new NotFoundException("disbursement-not-found",
-                "No disbursement for application " + applicationId));
+    public Optional<Disbursement> forApplication(UUID applicationId) {
+        return disbursements.forApplication(applicationId);
     }
 
     /**
