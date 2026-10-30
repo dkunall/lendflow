@@ -25,7 +25,7 @@ public abstract class DomainException extends RuntimeException {
     }
 
     /**
-     * Extra members for the problem body, such as the cart lines whose price changed.
+     * Extra members for the problem body, such as the fields still missing from a draft.
      */
     public Map<String, Object> details() {
         return details;

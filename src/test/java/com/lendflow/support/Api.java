@@ -62,6 +62,10 @@ public final class Api {
         return send(HttpMethod.PATCH, path, body, Map.of());
     }
 
+    public Response patch(String path, Object body, Map<String, String> headers) {
+        return send(HttpMethod.PATCH, path, body, headers);
+    }
+
     public Response delete(String path) {
         return send(HttpMethod.DELETE, path, null, Map.of());
     }
