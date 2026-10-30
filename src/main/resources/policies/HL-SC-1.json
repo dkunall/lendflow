@@ -1,0 +1,171 @@
+{
+  "id": "HL-SC-1",
+  "calibration": {
+    "baseScore": 500,
+    "baseOdds": 20,
+    "pdo": 40
+  },
+  "grades": {
+    "A": 600,
+    "B": 540,
+    "C": 480,
+    "D": 420,
+    "E": 0
+  },
+  "characteristics": [
+    {
+      "name": "Bureau score",
+      "fact": "bureauScore",
+      "reason": "SC_BUREAU_SCORE_LOW",
+      "bins": [
+        [
+          "null",
+          60,
+          "SC_NO_CREDIT_HISTORY"
+        ],
+        [
+          "<650",
+          40
+        ],
+        [
+          "[650..699]",
+          90
+        ],
+        [
+          "[700..749]",
+          130
+        ],
+        [
+          ">=750",
+          170
+        ]
+      ]
+    },
+    {
+      "name": "Days past due, 12 months",
+      "fact": "maxDpdLast12m",
+      "reason": "SC_RECENT_DELINQUENCY",
+      "bins": [
+        [
+          "0",
+          110
+        ],
+        [
+          "[1..30]",
+          70
+        ],
+        [
+          "[31..60]",
+          30
+        ],
+        [
+          ">60",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "Enquiries, 6 months",
+      "fact": "enquiriesLast6m",
+      "reason": "SC_MANY_RECENT_ENQUIRIES",
+      "bins": [
+        [
+          "[0..2]",
+          75
+        ],
+        [
+          "[3..5]",
+          50
+        ],
+        [
+          ">5",
+          20
+        ]
+      ]
+    },
+    {
+      "name": "Months on bureau",
+      "fact": "monthsOnBureau",
+      "reason": "SC_SHORT_CREDIT_HISTORY",
+      "bins": [
+        [
+          "<12",
+          30
+        ],
+        [
+          "[12..35]",
+          55
+        ],
+        [
+          "[36..71]",
+          75
+        ],
+        [
+          ">=72",
+          90
+        ]
+      ]
+    },
+    {
+      "name": "Existing obligations to income",
+      "fact": "foir",
+      "reason": "SC_HIGH_EXISTING_OBLIGATIONS",
+      "bins": [
+        [
+          "<0.25",
+          95
+        ],
+        [
+          "[0.25..0.45)",
+          70
+        ],
+        [
+          "[0.45..0.6)",
+          40
+        ],
+        [
+          ">=0.6",
+          10
+        ]
+      ]
+    },
+    {
+      "name": "Months in current job",
+      "fact": "monthsInCurrentJob",
+      "reason": "SC_SHORT_EMPLOYMENT",
+      "bins": [
+        [
+          "<12",
+          20
+        ],
+        [
+          "[12..35]",
+          50
+        ],
+        [
+          ">=36",
+          75
+        ]
+      ]
+    },
+    {
+      "name": "Employment type",
+      "fact": "employmentType",
+      "reason": "SC_EMPLOYMENT_TYPE",
+      "bins": [
+        [
+          "SALARIED",
+          60
+        ],
+        [
+          "SELF_EMPLOYED",
+          45
+        ],
+        [
+          "-",
+          30
+        ]
+      ]
+    }
+  ]
+}

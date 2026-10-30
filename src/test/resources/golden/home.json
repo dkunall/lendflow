@@ -1,0 +1,57 @@
+{
+  "ruleset": "home-v1",
+  "scorecard": "HL-SC-1",
+  "base": {
+    "age": 35,
+    "ageAtMaturity": 55,
+    "employmentType": "SALARIED",
+    "monthsInCurrentJob": 30,
+    "monthlyIncome": "200000",
+    "declaredEmi": "0",
+    "requestedAmount": "6000000",
+    "tenureMonths": 240,
+    "propertyValue": "7000000",
+    "kyc": "PASS",
+    "bureauHit": true,
+    "bureauScore": 782,
+    "maxDpdLast12m": 0,
+    "enquiriesLast6m": 1,
+    "monthsOnBureau": 74,
+    "writtenOff": false,
+    "reportedEmi": "0",
+    "duplicateSuspected": false
+  },
+  "cases": [
+    {
+      "name": "loan above 80% LTV is cut to the LTV cap",
+      "given": {},
+      "expect": {
+        "outcome": "APPROVE",
+        "reasons": [
+          "AUTO_APPROVED",
+          "COUNTER_OFFER_REDUCED_AMOUNT"
+        ],
+        "score": 650,
+        "grade": "A",
+        "pd": "0.003703",
+        "annualRate": "8.50",
+        "approvedAmount": "5600000",
+        "emi": "48598.10"
+      }
+    },
+    {
+      "name": "home loan tenure under five years is not offered",
+      "given": {
+        "tenureMonths": 36,
+        "ageAtMaturity": 38
+      },
+      "expect": {
+        "outcome": "REJECT",
+        "reasons": [
+          "ELIG_TENURE_BELOW_MIN",
+          "SC_SHORT_EMPLOYMENT"
+        ]
+      }
+    }
+  ]
+}

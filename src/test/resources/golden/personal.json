@@ -1,0 +1,223 @@
+{
+  "ruleset": "personal-v1",
+  "scorecard": "PL-SC-1",
+  "base": {
+    "age": 32,
+    "ageAtMaturity": 35,
+    "employmentType": "SALARIED",
+    "monthsInCurrentJob": 30,
+    "monthlyIncome": "90000",
+    "declaredEmi": "5000",
+    "requestedAmount": "300000",
+    "tenureMonths": 36,
+    "propertyValue": null,
+    "kyc": "PASS",
+    "bureauHit": true,
+    "bureauScore": 782,
+    "maxDpdLast12m": 0,
+    "enquiriesLast6m": 1,
+    "monthsOnBureau": 74,
+    "writtenOff": false,
+    "reportedEmi": "5000",
+    "duplicateSuspected": false
+  },
+  "cases": [
+    {
+      "name": "clean salaried file is approved as asked",
+      "given": {},
+      "expect": {
+        "outcome": "APPROVE",
+        "reasons": [
+          "AUTO_APPROVED"
+        ],
+        "score": 670,
+        "grade": "A",
+        "pd": "0.002621",
+        "annualRate": "10.50",
+        "approvedAmount": "300000",
+        "emi": "9750.73"
+      }
+    },
+    {
+      "name": "high bureau EMIs reduce the amount to what fits under FOIR",
+      "given": {
+        "bureauScore": 761,
+        "enquiriesLast6m": 2,
+        "monthsOnBureau": 96,
+        "reportedEmi": "38000"
+      },
+      "expect": {
+        "outcome": "APPROVE",
+        "reasons": [
+          "AUTO_APPROVED",
+          "COUNTER_OFFER_REDUCED_AMOUNT"
+        ],
+        "score": 615,
+        "grade": "A",
+        "annualRate": "10.50",
+        "approvedAmount": "215000",
+        "emi": "6988.03"
+      }
+    },
+    {
+      "name": "written-off account and 90 DPD are knocked out with reasons",
+      "given": {
+        "bureauScore": 588,
+        "maxDpdLast12m": 90,
+        "enquiriesLast6m": 7,
+        "monthsOnBureau": 58,
+        "writtenOff": true,
+        "reportedEmi": "21000"
+      },
+      "expect": {
+        "outcome": "REJECT",
+        "reasons": [
+          "ELIG_WRITTEN_OFF_ACCOUNT",
+          "ELIG_SERIOUS_DELINQUENCY",
+          "SC_BUREAU_SCORE_LOW",
+          "SC_RECENT_DELINQUENCY",
+          "SC_MANY_RECENT_ENQUIRIES"
+        ],
+        "score": 330,
+        "grade": "E",
+        "pd": "0.4875",
+        "approvedAmount": null
+      }
+    },
+    {
+      "name": "no bureau history goes to an underwriter",
+      "given": {
+        "bureauHit": false,
+        "bureauScore": null,
+        "enquiriesLast6m": 0,
+        "monthsOnBureau": 0,
+        "reportedEmi": "0",
+        "declaredEmi": "0"
+      },
+      "expect": {
+        "outcome": "REFER",
+        "reasons": [
+          "BUREAU_NO_HIT",
+          "SCORE_BORDERLINE",
+          "SC_NO_CREDIT_HISTORY",
+          "SC_SHORT_CREDIT_HISTORY"
+        ],
+        "score": 500,
+        "grade": "C",
+        "pd": "0.04762",
+        "annualRate": "16.00",
+        "approvedAmount": "300000",
+        "emi": "10547.11"
+      }
+    },
+    {
+      "name": "partial KYC name match is referred",
+      "given": {
+        "kyc": "REFER"
+      },
+      "expect": {
+        "outcome": "REFER",
+        "reasons": [
+          "KYC_NEEDS_REVIEW"
+        ],
+        "grade": "A"
+      }
+    },
+    {
+      "name": "failed KYC is rejected without an offer",
+      "given": {
+        "kyc": "FAIL"
+      },
+      "expect": {
+        "outcome": "REJECT",
+        "reasons": [
+          "KYC_FAILED"
+        ],
+        "approvedAmount": null
+      }
+    },
+    {
+      "name": "under 21 is not eligible",
+      "given": {
+        "age": 20,
+        "ageAtMaturity": 23
+      },
+      "expect": {
+        "outcome": "REJECT",
+        "reasons": [
+          "ELIG_AGE_BELOW_MIN"
+        ]
+      }
+    },
+    {
+      "name": "large amounts always need a person",
+      "given": {
+        "requestedAmount": "1500000",
+        "tenureMonths": 60,
+        "monthlyIncome": "250000",
+        "declaredEmi": "0",
+        "reportedEmi": "0",
+        "ageAtMaturity": 37
+      },
+      "expect": {
+        "outcome": "REFER",
+        "reasons": [
+          "ABOVE_AUTO_APPROVAL_LIMIT"
+        ],
+        "annualRate": "11.25",
+        "approvedAmount": "1500000",
+        "emi": "32800.96"
+      }
+    },
+    {
+      "name": "suspected duplicate is referred",
+      "given": {
+        "duplicateSuspected": true
+      },
+      "expect": {
+        "outcome": "REFER",
+        "reasons": [
+          "DUPLICATE_SUSPECTED"
+        ]
+      }
+    },
+    {
+      "name": "existing EMIs at the FOIR cap leave nothing to lend",
+      "given": {
+        "monthlyIncome": "30000",
+        "declaredEmi": "15000",
+        "reportedEmi": "0"
+      },
+      "expect": {
+        "outcome": "REJECT",
+        "reasons": [
+          "AFFORDABILITY_FOIR_EXCEEDED",
+          "SC_HIGH_EXISTING_OBLIGATIONS"
+        ],
+        "score": 615,
+        "approvedAmount": null
+      }
+    },
+    {
+      "name": "average file is approved at grade B pricing",
+      "given": {
+        "bureauScore": 701,
+        "maxDpdLast12m": 15,
+        "enquiriesLast6m": 5,
+        "monthsOnBureau": 40,
+        "reportedEmi": "14000"
+      },
+      "expect": {
+        "outcome": "APPROVE",
+        "reasons": [
+          "AUTO_APPROVED"
+        ],
+        "score": 550,
+        "grade": "B",
+        "annualRate": "13.00",
+        "approvedAmount": "300000",
+        "emi": "10108.19"
+      }
+    }
+  ]
+}

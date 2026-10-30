@@ -1,0 +1,380 @@
+{
+  "product": "PERSONAL",
+  "version": 1,
+  "champion": "PL-SC-1",
+  "challenger": "PL-SC-2",
+  "parameters": {
+    "foirCap": "0.50",
+    "maxLtv": null,
+    "minAmount": "50000",
+    "maxAmount": "2500000",
+    "amountStep": "1000",
+    "autoApproveLimit": "1000000",
+    "reasonLimit": 3
+  },
+  "eligibility": {
+    "hitPolicy": "COLLECT",
+    "inputs": [
+      "age",
+      "ageAtMaturity",
+      "monthlyIncome",
+      "writtenOff",
+      "maxDpdLast12m",
+      "requestedAmount",
+      "tenureMonths"
+    ],
+    "outputs": [
+      "reason"
+    ],
+    "rules": [
+      {
+        "id": "E1",
+        "when": [
+          "<21",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        "then": {
+          "reason": "ELIG_AGE_BELOW_MIN"
+        }
+      },
+      {
+        "id": "E2",
+        "when": [
+          "-",
+          ">60",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        "then": {
+          "reason": "ELIG_AGE_AT_MATURITY"
+        }
+      },
+      {
+        "id": "E3",
+        "when": [
+          "-",
+          "-",
+          "<25000",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        "then": {
+          "reason": "ELIG_INCOME_BELOW_MIN"
+        }
+      },
+      {
+        "id": "E4",
+        "when": [
+          "-",
+          "-",
+          "-",
+          "true",
+          "-",
+          "-",
+          "-"
+        ],
+        "then": {
+          "reason": "ELIG_WRITTEN_OFF_ACCOUNT"
+        }
+      },
+      {
+        "id": "E5",
+        "when": [
+          "-",
+          "-",
+          "-",
+          "-",
+          ">60",
+          "-",
+          "-"
+        ],
+        "then": {
+          "reason": "ELIG_SERIOUS_DELINQUENCY"
+        }
+      },
+      {
+        "id": "E6",
+        "when": [
+          "-",
+          "-",
+          "-",
+          "-",
+          "-",
+          "<50000",
+          "-"
+        ],
+        "then": {
+          "reason": "ELIG_AMOUNT_BELOW_MIN"
+        }
+      },
+      {
+        "id": "E7",
+        "when": [
+          "-",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-",
+          "<12"
+        ],
+        "then": {
+          "reason": "ELIG_TENURE_BELOW_MIN"
+        }
+      },
+      {
+        "id": "E8",
+        "when": [
+          "-",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-",
+          ">60"
+        ],
+        "then": {
+          "reason": "ELIG_TENURE_ABOVE_MAX"
+        }
+      }
+    ]
+  },
+  "decision": {
+    "hitPolicy": "PRIORITY",
+    "inputs": [
+      "kyc",
+      "bureauHit",
+      "grade",
+      "duplicateSuspected",
+      "affordable",
+      "aboveAutoLimit"
+    ],
+    "outputs": [
+      "outcome",
+      "reason"
+    ],
+    "priority": {
+      "output": "outcome",
+      "order": [
+        "REJECT",
+        "REFER",
+        "APPROVE"
+      ]
+    },
+    "rules": [
+      {
+        "id": "D1",
+        "when": [
+          "FAIL",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        "then": {
+          "outcome": "REJECT",
+          "reason": "KYC_FAILED"
+        }
+      },
+      {
+        "id": "D2",
+        "when": [
+          "-",
+          "-",
+          "D,E",
+          "-",
+          "-",
+          "-"
+        ],
+        "then": {
+          "outcome": "REJECT",
+          "reason": "SCORE_BELOW_CUTOFF"
+        }
+      },
+      {
+        "id": "D3",
+        "when": [
+          "-",
+          "-",
+          "-",
+          "-",
+          "false",
+          "-"
+        ],
+        "then": {
+          "outcome": "REJECT",
+          "reason": "AFFORDABILITY_FOIR_EXCEEDED"
+        }
+      },
+      {
+        "id": "D4",
+        "when": [
+          "REFER",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        "then": {
+          "outcome": "REFER",
+          "reason": "KYC_NEEDS_REVIEW"
+        }
+      },
+      {
+        "id": "D5",
+        "when": [
+          "-",
+          "false",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        "then": {
+          "outcome": "REFER",
+          "reason": "BUREAU_NO_HIT"
+        }
+      },
+      {
+        "id": "D6",
+        "when": [
+          "-",
+          "-",
+          "C",
+          "-",
+          "-",
+          "-"
+        ],
+        "then": {
+          "outcome": "REFER",
+          "reason": "SCORE_BORDERLINE"
+        }
+      },
+      {
+        "id": "D7",
+        "when": [
+          "-",
+          "-",
+          "-",
+          "true",
+          "-",
+          "-"
+        ],
+        "then": {
+          "outcome": "REFER",
+          "reason": "DUPLICATE_SUSPECTED"
+        }
+      },
+      {
+        "id": "D8",
+        "when": [
+          "-",
+          "-",
+          "-",
+          "-",
+          "-",
+          "true"
+        ],
+        "then": {
+          "outcome": "REFER",
+          "reason": "ABOVE_AUTO_APPROVAL_LIMIT"
+        }
+      },
+      {
+        "id": "D9",
+        "when": [
+          "PASS",
+          "true",
+          "A,B",
+          "false",
+          "true",
+          "false"
+        ],
+        "then": {
+          "outcome": "APPROVE",
+          "reason": "AUTO_APPROVED"
+        }
+      }
+    ]
+  },
+  "pricing": {
+    "hitPolicy": "FIRST",
+    "inputs": [
+      "grade",
+      "tenureMonths"
+    ],
+    "outputs": [
+      "annualRate",
+      "processingFeePercent"
+    ],
+    "rules": [
+      {
+        "id": "P1",
+        "when": [
+          "A",
+          "<=36"
+        ],
+        "then": {
+          "annualRate": "10.50",
+          "processingFeePercent": "1.0"
+        }
+      },
+      {
+        "id": "P2",
+        "when": [
+          "A",
+          "-"
+        ],
+        "then": {
+          "annualRate": "11.25",
+          "processingFeePercent": "1.0"
+        }
+      },
+      {
+        "id": "P3",
+        "when": [
+          "B",
+          "<=36"
+        ],
+        "then": {
+          "annualRate": "13.00",
+          "processingFeePercent": "1.5"
+        }
+      },
+      {
+        "id": "P4",
+        "when": [
+          "B",
+          "-"
+        ],
+        "then": {
+          "annualRate": "13.75",
+          "processingFeePercent": "1.5"
+        }
+      },
+      {
+        "id": "P5",
+        "when": [
+          "C",
+          "-"
+        ],
+        "then": {
+          "annualRate": "16.00",
+          "processingFeePercent": "2.0"
+        }
+      }
+    ]
+  }
+}
