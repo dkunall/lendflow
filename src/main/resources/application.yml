@@ -63,6 +63,17 @@ lendflow:
     lookup-key: ${LENDFLOW_LOOKUP_KEY}
   bureau:
     url: ${LENDFLOW_BUREAU_URL:http://localhost:7992}
+    timeout: 3s
+    retry:
+      max-attempts: 3
+      first-wait: 200ms
+    breaker:
+      window: 20
+      minimum-calls: 10
+      failure-rate: 50
+      open-for: 30s
+    max-concurrent: 8
+    max-wait-for-slot: 1s
   kyc:
     # The mock serves PAN verification and credit reports from one process; in production they are separate
     # providers, which is why the URLs are separate settings.

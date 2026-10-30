@@ -1,0 +1,38 @@
+{
+  "name": "PAN digits 7xxx: answers after the client timeout",
+  "priority": 2,
+  "request": {
+    "method": "POST",
+    "url": "/bureau/v1/credit-report",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.consent.version"
+      },
+      {
+        "matchesJsonPath": "$[?(@.pan =~ /[A-Z]{5}7[0-9]{3}[A-Z]/)]"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bureauRef": "CIR-{{randomValue length=10 type='ALPHANUMERIC' uppercase=true}}",
+      "hit": true,
+      "score": 782,
+      "activeAccounts": 3,
+      "totalOutstanding": 420000,
+      "maxDpdLast12m": 0,
+      "enquiriesLast6m": 1,
+      "monthsOnBureau": 74,
+      "writtenOff": false,
+      "reportedEmi": 5000
+    },
+    "transformers": [
+      "response-template"
+    ],
+    "fixedDelayMilliseconds": 4000
+  }
+}

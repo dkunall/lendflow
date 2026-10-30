@@ -15,7 +15,7 @@ public final class Drafts {
 
     /** A PAN the mock bureau treats as a clean file with a good score. */
     public static String goodPan() {
-        return pan(1000 + ThreadLocalRandom.current().nextInt(5000));
+        return pan(1000 + ThreadLocalRandom.current().nextInt(2000));
     }
 
     public static String pan(int digits) {

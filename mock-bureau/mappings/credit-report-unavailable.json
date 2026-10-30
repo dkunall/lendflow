@@ -1,0 +1,20 @@
+{
+  "name": "PAN digits 3xxx: bureau keeps failing",
+  "priority": 2,
+  "request": {
+    "method": "POST",
+    "url": "/bureau/v1/credit-report",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.consent.version"
+      },
+      {
+        "matchesJsonPath": "$[?(@.pan =~ /[A-Z]{5}3[0-9]{3}[A-Z]/)]"
+      }
+    ]
+  },
+  "response": {
+    "status": 503,
+    "body": "bureau maintenance"
+  }
+}

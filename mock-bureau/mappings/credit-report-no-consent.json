@@ -1,0 +1,17 @@
+{
+  "name": "Requests without consent are refused",
+  "priority": 20,
+  "request": {
+    "method": "POST",
+    "url": "/bureau/v1/credit-report"
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "error": "consent required"
+    }
+  }
+}

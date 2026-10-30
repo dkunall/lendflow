@@ -1,0 +1,37 @@
+{
+  "name": "PAN digits 8xxx: serious delinquency",
+  "priority": 2,
+  "request": {
+    "method": "POST",
+    "url": "/bureau/v1/credit-report",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.consent.version"
+      },
+      {
+        "matchesJsonPath": "$[?(@.pan =~ /[A-Z]{5}8[0-9]{3}[A-Z]/)]"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bureauRef": "CIR-{{randomValue length=10 type='ALPHANUMERIC' uppercase=true}}",
+      "hit": true,
+      "score": 588,
+      "activeAccounts": 6,
+      "totalOutstanding": 740000,
+      "maxDpdLast12m": 90,
+      "enquiriesLast6m": 7,
+      "monthsOnBureau": 58,
+      "writtenOff": true,
+      "reportedEmi": 21000
+    },
+    "transformers": [
+      "response-template"
+    ]
+  }
+}

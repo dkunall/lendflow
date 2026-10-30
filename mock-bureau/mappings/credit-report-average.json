@@ -1,0 +1,37 @@
+{
+  "name": "PAN digits 4xxx: average file, recent enquiries",
+  "priority": 2,
+  "request": {
+    "method": "POST",
+    "url": "/bureau/v1/credit-report",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.consent.version"
+      },
+      {
+        "matchesJsonPath": "$[?(@.pan =~ /[A-Z]{5}4[0-9]{3}[A-Z]/)]"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bureauRef": "CIR-{{randomValue length=10 type='ALPHANUMERIC' uppercase=true}}",
+      "hit": true,
+      "score": 701,
+      "activeAccounts": 5,
+      "totalOutstanding": 910000,
+      "maxDpdLast12m": 15,
+      "enquiriesLast6m": 5,
+      "monthsOnBureau": 40,
+      "writtenOff": false,
+      "reportedEmi": 14000
+    },
+    "transformers": [
+      "response-template"
+    ]
+  }
+}

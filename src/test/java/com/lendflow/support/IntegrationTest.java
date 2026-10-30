@@ -50,6 +50,8 @@ public abstract class IntegrationTest {
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
         registry.add("lendflow.bureau.url", BUREAU::baseUrl);
+        registry.add("lendflow.bureau.timeout", () -> "1s");
+        registry.add("lendflow.bureau.retry.first-wait", () -> "20ms");
         registry.add("lendflow.crypto.data-key", () -> DATA_KEY);
         registry.add("lendflow.crypto.lookup-key", () -> LOOKUP_KEY);
     }

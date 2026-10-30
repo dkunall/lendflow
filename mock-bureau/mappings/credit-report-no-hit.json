@@ -1,0 +1,29 @@
+{
+  "name": "PAN digits 9xxx: no credit history",
+  "priority": 2,
+  "request": {
+    "method": "POST",
+    "url": "/bureau/v1/credit-report",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.consent.version"
+      },
+      {
+        "matchesJsonPath": "$[?(@.pan =~ /[A-Z]{5}9[0-9]{3}[A-Z]/)]"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bureauRef": "CIR-{{randomValue length=10 type='ALPHANUMERIC' uppercase=true}}",
+      "hit": false
+    },
+    "transformers": [
+      "response-template"
+    ]
+  }
+}
