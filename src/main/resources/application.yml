@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: lendflow
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${LENDFLOW_DB_URL:jdbc:postgresql://localhost:55790/lendflow}
+    username: ${LENDFLOW_DB_USER:lendflow}
+    password: ${LENDFLOW_DB_PASSWORD:lendflow}
+    hikari:
+      maximum-pool-size: 20
+      connection-timeout: 3000
+      connection-init-sql: SET lock_timeout = '3s'
+  flyway:
+    locations: classpath:db/migration
+  kafka:
+    bootstrap-servers: ${LENDFLOW_KAFKA_BOOTSTRAP:localhost:9092}
+    producer:
+      acks: all
+      properties:
+        enable.idempotence: true
+        delivery.timeout.ms: 10000
+        request.timeout.ms: 5000
+    consumer:
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${LENDFLOW_JWT_ISSUER:http://localhost:7991/lendflow}
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 3MB
+  task:
+    scheduling:
+      pool:
+        size: 4
+
+server:
+  port: ${PORT:7990}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+lendflow:
+  outbox:
+    batch-size: 100
+    retention: P7D
+  crypto:
+    # No defaults on purpose: the app refuses to start without keys. Both are base64 of 32 random bytes.
+    data-key: ${LENDFLOW_DATA_KEY}
+    lookup-key: ${LENDFLOW_LOOKUP_KEY}
