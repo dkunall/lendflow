@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 
 class AssessmentBackoffTest {
 
-    private final Assessment assessment = new Assessment(null, null, null, null, null, null, null, Clock.systemUTC(),
-        new SimpleMeterRegistry(), 4, Duration.ofSeconds(2), Duration.ofSeconds(60));
+    private final Assessment assessment = new Assessment(null, null, null, null, null, null, null, null,
+        Clock.systemUTC(), new SimpleMeterRegistry(), 4, Duration.ofSeconds(2), Duration.ofSeconds(60));
 
     @Test
     void doublesFromTheFirstWaitUpToTheCap() {

@@ -20,6 +20,11 @@ class KafkaConfig {
         return TopicBuilder.name(Topics.APPLICATIONS).partitions(PARTITIONS).replicas(1).build();
     }
 
+    @Bean
+    NewTopic sanctionsTopic() {
+        return TopicBuilder.name(Topics.SANCTIONS).partitions(PARTITIONS).replicas(1).build();
+    }
+
     /**
      * A few quick retries cover transient database errors; anything still failing goes to {topic}.DLT
      * so one bad message cannot stall its partition.

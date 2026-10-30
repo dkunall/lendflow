@@ -9,6 +9,7 @@ import com.lendflow.bureau.application.BureauService;
 import com.lendflow.decision.application.DecisionService;
 import com.lendflow.decision.application.DecisionView;
 import com.lendflow.kyc.application.KycService;
+import com.lendflow.offer.application.OfferService;
 import com.lendflow.shared.error.UpstreamUnavailableException;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Clock;
@@ -45,6 +46,7 @@ public class Assessment {
     private final KycService kyc;
     private final BureauService bureau;
     private final DecisionService decisions;
+    private final OfferService offers;
     private final JobRepository jobs;
     private final TransactionTemplate tx;
     private final Clock clock;
@@ -54,8 +56,8 @@ public class Assessment {
     private final Duration maxBackoff;
 
     Assessment(ApplicationService applications, ApplicationTransitions transitions, KycService kyc,
-               BureauService bureau, DecisionService decisions, JobRepository jobs, TransactionTemplate tx,
-               Clock clock, MeterRegistry meters,
+               BureauService bureau, DecisionService decisions, OfferService offers, JobRepository jobs,
+               TransactionTemplate tx, Clock clock, MeterRegistry meters,
                @Value("${lendflow.workflow.max-attempts:4}") int maxAttempts,
                @Value("${lendflow.workflow.first-backoff:2s}") Duration firstBackoff,
                @Value("${lendflow.workflow.max-backoff:60s}") Duration maxBackoff) {
@@ -64,6 +66,7 @@ public class Assessment {
         this.kyc = kyc;
         this.bureau = bureau;
         this.decisions = decisions;
+        this.offers = offers;
         this.jobs = jobs;
         this.tx = tx;
         this.clock = clock;
@@ -124,6 +127,9 @@ public class Assessment {
                 case REJECT -> LifecycleEvent.AUTO_REJECT;
             };
             transitions.apply(checked.get(), event, ACTOR, String.join(",", decision.reasons()));
+            if (event == LifecycleEvent.AUTO_APPROVE) {
+                offers.create(job.applicationId());
+            }
         }
         jobs.complete(job.id());
         return Result.ROUTED;
