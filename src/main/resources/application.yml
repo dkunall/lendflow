@@ -61,3 +61,17 @@ lendflow:
     # No defaults on purpose: the app refuses to start without keys. Both are base64 of 32 random bytes.
     data-key: ${LENDFLOW_DATA_KEY}
     lookup-key: ${LENDFLOW_LOOKUP_KEY}
+  bureau:
+    url: ${LENDFLOW_BUREAU_URL:http://localhost:7992}
+  kyc:
+    # The mock serves PAN verification and credit reports from one process; in production they are separate
+    # providers, which is why the URLs are separate settings.
+    registry-url: ${LENDFLOW_PAN_REGISTRY_URL:${lendflow.bureau.url}}
+    timeout: 2s
+    name-pass: 0.85
+    name-refer: 0.70
+  documents:
+    max-size: 2MB
+  dedupe:
+    name-threshold: 0.92
+    lookback: P180D

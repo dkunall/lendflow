@@ -3,6 +3,7 @@ package com.lendflow.application;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.lendflow.support.Api;
+import com.lendflow.support.Documents;
 import com.lendflow.support.Drafts;
 import com.lendflow.support.IntegrationTest;
 import java.util.ArrayList;
@@ -100,7 +101,8 @@ class ApplicationIT extends IntegrationTest {
         assertThat(rejected.body().path("code").asText()).isEqualTo("application-incomplete");
         List<String> missing = new ArrayList<>();
         rejected.body().path("missing").forEach(n -> missing.add(n.asText()));
-        assertThat(missing).contains("tenureMonths", "propertyValue", "applicant", "bureauConsent");
+        assertThat(missing).contains("tenureMonths", "propertyValue", "applicant", "bureauConsent",
+            "document:PAN_CARD", "document:PROPERTY_DOCUMENT");
     }
 
     @Test
@@ -108,7 +110,7 @@ class ApplicationIT extends IntegrationTest {
         Api vikram = as("vikram-" + unique(), APPLICANT);
         String id = vikram.post("/v1/applications", Drafts.personalLoan("Vikram Rao")).expect(201)
             .body().path("id").asText();
-        uploadRequiredDocuments(vikram, id);
+        Documents.uploadRequired(vikram, id, false);
 
         List<Integer> statuses = race(8, i -> vikram.post("/v1/applications/" + id + "/submit", null).status());
 
@@ -126,17 +128,13 @@ class ApplicationIT extends IntegrationTest {
     void aSubmittedApplicationCanNoLongerBeEditedOrWithdrawn() {
         Api sana = as("sana-" + unique(), APPLICANT);
         String id = sana.post("/v1/applications", Drafts.personalLoan("Sana Qureshi")).expect(201).body().path("id").asText();
-        uploadRequiredDocuments(sana, id);
+        Documents.uploadRequired(sana, id, false);
         int version = sana.post("/v1/applications/" + id + "/submit", null).expect(200).body().path("version").asInt();
 
         assertThat(sana.patch("/v1/applications/" + id, Map.of("amount", "1000"), Map.of("If-Match", "\"" + version + "\""))
             .status()).isIn(409, 412);
         assertThat(sana.post("/v1/applications/" + id + "/withdraw", null).expect(409).body().path("code").asText())
             .isEqualTo("illegal-transition");
-    }
-
-    /** Overridden once documents exist; until then submit has no document check. */
-    protected void uploadRequiredDocuments(Api api, String applicationId) {
     }
 
     private static List<Integer> race(int threads, IndexedCall call) throws Exception {

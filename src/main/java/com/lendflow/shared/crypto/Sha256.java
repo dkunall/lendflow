@@ -11,9 +11,13 @@ public final class Sha256 {
     }
 
     public static String hex(String input) {
+        return hex(input.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String hex(byte[] input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return HexFormat.of().formatHex(digest.digest(input.getBytes(StandardCharsets.UTF_8)));
+            return HexFormat.of().formatHex(digest.digest(input));
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 is required by the JDK spec", e);
         }

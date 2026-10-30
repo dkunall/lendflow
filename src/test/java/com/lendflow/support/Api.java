@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
@@ -64,6 +67,30 @@ public final class Api {
 
     public Response patch(String path, Object body, Map<String, String> headers) {
         return send(HttpMethod.PATCH, path, body, headers);
+    }
+
+    public Response upload(String path, String type, String fileName, byte[] content) {
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("type", type);
+        parts.add("file", new ByteArrayResource(content) {
+            @Override
+            public String getFilename() {
+                return fileName;
+            }
+        });
+        return client.post().uri(path)
+            .headers(h -> {
+                if (token != null) {
+                    h.setBearerAuth(token);
+                }
+            })
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(parts)
+            .exchange((request, response) -> {
+                byte[] bytes = response.getBody().readAllBytes();
+                return new Response(response.getStatusCode().value(), bytes.length == 0 ? MAPPER.nullNode() : parse(bytes),
+                    response.getHeaders());
+            });
     }
 
     public Response delete(String path) {
