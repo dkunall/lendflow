@@ -127,7 +127,10 @@ class ApplicationIT extends IntegrationTest {
     @Test
     void aSubmittedApplicationCanNoLongerBeEditedOrWithdrawn() {
         Api sana = as("sana-" + unique(), APPLICANT);
-        String id = sana.post("/v1/applications", Drafts.personalLoan("Sana Qureshi")).expect(201).body().path("id").asText();
+        // A bureau that is down keeps the application in checks, then refers it; neither state can be withdrawn.
+        Map<String, Object> draft = Drafts.personalLoan(Drafts.personal("Sana Qureshi", Drafts.pan(3150)), "300000", 36,
+            "90000", "5000");
+        String id = sana.post("/v1/applications", draft).expect(201).body().path("id").asText();
         Documents.uploadRequired(sana, id, false);
         int version = sana.post("/v1/applications/" + id + "/submit", null).expect(200).body().path("version").asInt();
 

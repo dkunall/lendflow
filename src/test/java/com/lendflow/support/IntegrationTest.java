@@ -52,6 +52,13 @@ public abstract class IntegrationTest {
         registry.add("lendflow.bureau.url", BUREAU::baseUrl);
         registry.add("lendflow.bureau.timeout", () -> "1s");
         registry.add("lendflow.bureau.retry.first-wait", () -> "20ms");
+        // Outage tests would otherwise open the shared breaker for the tests after them. Resilience4j caps minimum calls at
+        // the window size, so both move. BureauResilienceTest covers the breaker itself.
+        registry.add("lendflow.bureau.breaker.window", () -> "1000");
+        registry.add("lendflow.bureau.breaker.minimum-calls", () -> "1000");
+        registry.add("lendflow.workflow.poll-ms", () -> "100");
+        registry.add("lendflow.workflow.max-attempts", () -> "3");
+        registry.add("lendflow.workflow.first-backoff", () -> "50ms");
         registry.add("lendflow.crypto.data-key", () -> DATA_KEY);
         registry.add("lendflow.crypto.lookup-key", () -> LOOKUP_KEY);
     }
