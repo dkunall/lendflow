@@ -9,6 +9,7 @@ import com.lendflow.shared.json.Json;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -99,5 +100,25 @@ class JdbcPolicyRepository implements PolicyRepository {
             rs.getInt("version"), RulesetStatus.valueOf(rs.getString("status")), json.read(rs.getString("definition")),
             rs.getString("created_by"), rs.getTimestamp("created_at").toInstant(), rs.getString("published_by"),
             publishedAt == null ? null : publishedAt.toInstant());
+    }
+
+    @Override
+    public void publish(StoredRuleset draft, String by, Instant at) {
+        jdbc.sql("UPDATE rulesets SET status = 'RETIRED' WHERE product = ? AND status = 'PUBLISHED'")
+            .param(draft.product().name()).update();
+        int updated = jdbc.sql("""
+                UPDATE rulesets SET status = 'PUBLISHED', published_by = ?, published_at = ?
+                WHERE id = ? AND status = 'DRAFT'
+                """)
+            .params(by, Timestamp.from(at), draft.id())
+            .update();
+        if (updated != 1) {
+            throw new IllegalStateException("Ruleset " + draft.id() + " is no longer a draft");
+        }
+    }
+
+    @Override
+    public void lockProduct(Product product) {
+        jdbc.sql("SELECT pg_advisory_xact_lock(hashtext('ruleset:' || ?))").param(product.name()).query().singleRow();
     }
 }

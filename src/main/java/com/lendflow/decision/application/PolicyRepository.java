@@ -2,6 +2,7 @@ package com.lendflow.decision.application;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.lendflow.shared.domain.Product;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,4 +26,10 @@ public interface PolicyRepository {
     List<StoredRuleset> all(Product product);
 
     int nextVersion(Product product);
+
+    /** Retires the product's published version and publishes this draft. Callers hold the product lock. */
+    void publish(StoredRuleset draft, String by, Instant at);
+
+    /** Serialises publishes and version numbering per product until the transaction ends. */
+    void lockProduct(Product product);
 }

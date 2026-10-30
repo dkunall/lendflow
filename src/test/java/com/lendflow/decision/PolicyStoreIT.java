@@ -30,7 +30,9 @@ class PolicyStoreIT extends IntegrationTest {
         assertThat(personal.ruleset().key()).isEqualTo("PERSONAL-v1");
         assertThat(personal.champion().id()).isEqualTo("PL-SC-1");
         assertThat(personal.challengerScorecard()).map(c -> c.id()).contains("PL-SC-2");
-        assertThat(home.ruleset().key()).isEqualTo("HOME-v1");
+        // RulesetIT may already have published an unchanged copy of the home policy as a later version.
+        assertThat(home.ruleset().key()).startsWith("HOME-v");
+        assertThat(home.champion().id()).isEqualTo("HL-SC-1");
         assertThat(home.challengerScorecard()).isEmpty();
     }
 
