@@ -83,6 +83,13 @@ lendflow:
     name-refer: 0.70
   documents:
     max-size: 2MB
+  workflow:
+    poll-ms: 500
+    batch-size: 8
+    lease: 60s
+    max-attempts: 4
+    first-backoff: 2s
+    max-backoff: 60s
   dedupe:
     name-threshold: 0.92
     lookback: P180D
