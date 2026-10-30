@@ -8,6 +8,7 @@ import com.lendflow.decision.application.ShadowReport;
 import com.lendflow.decision.application.ShadowScore;
 import com.lendflow.decision.domain.Outcome;
 import com.lendflow.decision.domain.Scorecard;
+import com.lendflow.shared.domain.Product;
 import com.lendflow.shared.json.Json;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -108,5 +109,20 @@ class JdbcDecisionRepository implements DecisionRepository {
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Stored decision JSON is unreadable", e);
         }
+    }
+
+    @Override
+    public List<RecordedInputs> recentInputs(Product product, int limit) {
+        return jdbc.sql("""
+                SELECT d.application_id, d.outcome, d.inputs::text AS inputs
+                FROM decisions d JOIN applications a ON a.id = d.application_id
+                WHERE a.product = ?
+                ORDER BY d.decided_at DESC
+                LIMIT ?
+                """)
+            .params(product.name(), limit)
+            .query((rs, row) -> new RecordedInputs(rs.getObject("application_id", UUID.class),
+                Outcome.valueOf(rs.getString("outcome")), json.read(rs.getString("inputs"))))
+            .list();
     }
 }
