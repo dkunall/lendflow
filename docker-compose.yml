@@ -1,0 +1,81 @@
+name: lendflow
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: lendflow
+      POSTGRES_USER: lendflow
+      POSTGRES_PASSWORD: lendflow
+    ports:
+      - "127.0.0.1:55790:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lendflow -d lendflow"]
+      interval: 5s
+      retries: 20
+
+  kafka:
+    image: apache/kafka:3.8.0
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_HEAP_OPTS: -Xmx256m -Xms256m
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+
+  # Issues a token to any client_id; the requested scope becomes the role.
+  oauth:
+    image: ghcr.io/navikt/mock-oauth2-server:2.1.10
+    environment:
+      SERVER_PORT: 8080
+      JSON_CONFIG: |
+        {"interactiveLogin": false, "tokenCallbacks": [{"issuerId": "lendflow", "tokenExpiry": 3600, "requestMappings": [
+            {"requestParam": "scope", "match": "lendflow.applicant", "claims": {"sub": "$${clientId}", "scope": "lendflow.applicant"}},
+            {"requestParam": "scope", "match": "lendflow.underwriter", "claims": {"sub": "$${clientId}", "scope": "lendflow.underwriter"}},
+            {"requestParam": "scope", "match": "lendflow.credit_manager", "claims": {"sub": "$${clientId}", "scope": "lendflow.credit_manager"}},
+            {"requestParam": "scope", "match": "lendflow.credit_head", "claims": {"sub": "$${clientId}", "scope": "lendflow.credit_head"}},
+            {"requestParam": "scope", "match": "lendflow.policy", "claims": {"sub": "$${clientId}", "scope": "lendflow.policy"}},
+            {"requestParam": "scope", "match": "lendflow.ops", "claims": {"sub": "$${clientId}", "scope": "lendflow.ops"}}
+        ]}]}
+    ports:
+      - "127.0.0.1:7991:8080"
+
+  # Mock credit bureau and PAN registry; the PAN's digits pick the profile (see mock-bureau/mappings).
+  bureau:
+    build: mock-bureau
+    image: lendflow-mock-bureau:local
+    command: ["--disable-banner"]
+    ports:
+      - "127.0.0.1:7992:8080"
+
+  app:
+    build: .
+    image: lendflow:local
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+      oauth: { condition: service_started }
+      bureau: { condition: service_started }
+    environment:
+      LENDFLOW_DB_URL: jdbc:postgresql://postgres:5432/lendflow
+      LENDFLOW_KAFKA_BOOTSTRAP: kafka:9092
+      LENDFLOW_JWT_ISSUER: http://oauth:8080/lendflow
+      LENDFLOW_BUREAU_URL: http://bureau:8080
+      # Required, no defaults: base64 of 32 random bytes each, e.g. export LENDFLOW_DATA_KEY=$(openssl rand -base64 32)
+      LENDFLOW_DATA_KEY: ${LENDFLOW_DATA_KEY:?set LENDFLOW_DATA_KEY}
+      LENDFLOW_LOOKUP_KEY: ${LENDFLOW_LOOKUP_KEY:?set LENDFLOW_LOOKUP_KEY}
+      JAVA_TOOL_OPTIONS: -Xmx384m -XX:+ExitOnOutOfMemoryError
+    ports:
+      - "127.0.0.1:7990:7990"
