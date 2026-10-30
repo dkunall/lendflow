@@ -37,6 +37,11 @@ public abstract class IntegrationTest {
     protected static final WireMockServer BUREAU = new WireMockServer(WireMockConfiguration.options()
         .dynamicPort().globalTemplating(true).usingFilesUnderDirectory("mock-bureau"));
 
+    private static final SecureRandom RANDOM = new SecureRandom();
+    // Generated per run so no key ever lives in the repository, and fixed for the JVM so every context agrees.
+    private static final String DATA_KEY = randomKey();
+    private static final String LOOKUP_KEY = randomKey();
+
     static {
         Startables.deepStart(POSTGRES, KAFKA).join();
         BUREAU.start();
@@ -45,9 +50,8 @@ public abstract class IntegrationTest {
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
         registry.add("lendflow.bureau.url", BUREAU::baseUrl);
-        // Generated per run so no key ever lives in the repository.
-        registry.add("lendflow.crypto.data-key", IntegrationTest::randomKey);
-        registry.add("lendflow.crypto.lookup-key", IntegrationTest::randomKey);
+        registry.add("lendflow.crypto.data-key", () -> DATA_KEY);
+        registry.add("lendflow.crypto.lookup-key", () -> LOOKUP_KEY);
     }
 
     @LocalServerPort
@@ -70,8 +74,6 @@ public abstract class IntegrationTest {
     protected static String unique() {
         return Long.toHexString(System.nanoTime());
     }
-
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     private static String randomKey() {
         byte[] key = new byte[32];
