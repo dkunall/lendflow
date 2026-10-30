@@ -11,6 +11,7 @@ import com.lendflow.decision.application.DecisionView;
 import com.lendflow.kyc.application.KycService;
 import com.lendflow.offer.application.OfferService;
 import com.lendflow.shared.error.UpstreamUnavailableException;
+import com.lendflow.underwriting.application.UnderwritingService;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Clock;
 import java.time.Duration;
@@ -47,6 +48,7 @@ public class Assessment {
     private final BureauService bureau;
     private final DecisionService decisions;
     private final OfferService offers;
+    private final UnderwritingService underwriting;
     private final JobRepository jobs;
     private final TransactionTemplate tx;
     private final Clock clock;
@@ -56,8 +58,8 @@ public class Assessment {
     private final Duration maxBackoff;
 
     Assessment(ApplicationService applications, ApplicationTransitions transitions, KycService kyc,
-               BureauService bureau, DecisionService decisions, OfferService offers, JobRepository jobs,
-               TransactionTemplate tx, Clock clock, MeterRegistry meters,
+               BureauService bureau, DecisionService decisions, OfferService offers, UnderwritingService underwriting,
+               JobRepository jobs, TransactionTemplate tx, Clock clock, MeterRegistry meters,
                @Value("${lendflow.workflow.max-attempts:4}") int maxAttempts,
                @Value("${lendflow.workflow.first-backoff:2s}") Duration firstBackoff,
                @Value("${lendflow.workflow.max-backoff:60s}") Duration maxBackoff) {
@@ -67,6 +69,7 @@ public class Assessment {
         this.bureau = bureau;
         this.decisions = decisions;
         this.offers = offers;
+        this.underwriting = underwriting;
         this.jobs = jobs;
         this.tx = tx;
         this.clock = clock;
@@ -119,6 +122,7 @@ public class Assessment {
         }
         if (!unavailable.isEmpty()) {
             transitions.apply(checked.get(), LifecycleEvent.REFER, ACTOR, checkNote);
+            underwriting.open(job.applicationId());
         } else {
             DecisionView decision = decisions.decide(job.applicationId());
             LifecycleEvent event = switch (decision.outcome()) {
@@ -127,8 +131,10 @@ public class Assessment {
                 case REJECT -> LifecycleEvent.AUTO_REJECT;
             };
             transitions.apply(checked.get(), event, ACTOR, String.join(",", decision.reasons()));
-            if (event == LifecycleEvent.AUTO_APPROVE) {
-                offers.create(job.applicationId());
+            switch (event) {
+                case AUTO_APPROVE -> offers.create(job.applicationId());
+                case REFER -> underwriting.open(job.applicationId());
+                default -> { }
             }
         }
         jobs.complete(job.id());

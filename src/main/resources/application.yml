@@ -98,6 +98,14 @@ lendflow:
     home:
       fee-cap: 25000
       valid-for: 30d
+  underwriting:
+    maker-sla: 4h
+    checker-sla: 2h
+    sweep-ms: 60000
+    sweep-batch: 50
+    manager-limit:
+      personal: 1500000
+      home: 10000000
   dedupe:
     name-threshold: 0.92
     lookback: P180D

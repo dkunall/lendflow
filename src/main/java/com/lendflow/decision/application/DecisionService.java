@@ -27,6 +27,7 @@ import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -129,6 +130,11 @@ public class DecisionService {
         applications.readable(actor, applicationId);
         DecisionView view = find(applicationId);
         return actor.isStaff() ? view : view.forApplicant();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<DecisionView> recorded(UUID applicationId) {
+        return repository.find(applicationId);
     }
 
     @Transactional(readOnly = true)

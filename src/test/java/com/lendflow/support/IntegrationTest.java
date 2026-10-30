@@ -59,6 +59,7 @@ public abstract class IntegrationTest {
         registry.add("lendflow.workflow.poll-ms", () -> "100");
         registry.add("lendflow.workflow.max-attempts", () -> "3");
         registry.add("lendflow.workflow.first-backoff", () -> "50ms");
+        registry.add("lendflow.underwriting.sweep-ms", () -> "100");
         registry.add("lendflow.crypto.data-key", () -> DATA_KEY);
         registry.add("lendflow.crypto.lookup-key", () -> LOOKUP_KEY);
     }
